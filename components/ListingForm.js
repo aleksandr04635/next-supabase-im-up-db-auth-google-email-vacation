@@ -7,6 +7,8 @@ import { Formik, Form } from 'formik';
 import Input from '@/components/Input';
 import ImageUpload from '@/components/ImageUpload';
 
+import axios from 'axios';
+
 const ListingSchema = Yup.object().shape({
   title: Yup.string().trim().required(),
   description: Yup.string().trim().required(),
@@ -27,8 +29,27 @@ const ListingForm = ({
   const [disabled, setDisabled] = useState(false);
   const [imageUrl, setImageUrl] = useState(initialValues?.image ?? '');
 
-  const upload = async image => {
-    // TODO: Upload image to remote storage
+
+const upload = async image => {
+    console.log('image');
+    console.log(image);
+    if (!image) return;
+
+    let toastId;
+    try {
+      setDisabled(true);
+      toastId = toast.loading('Uploading...');
+      const { data } = await axios.post('/api/image-upload', { image });
+      console.log('data?.url');
+      console.log(data?.url);
+      setImageUrl(data?.url);
+      toast.success('Successfully uploaded', { id: toastId });
+    } catch (e) {
+      toast.error('Unable to upload', { id: toastId });
+      setImageUrl('');
+    } finally {
+      setDisabled(false);
+    }
   };
 
   const handleOnSubmit = async (values = null) => {

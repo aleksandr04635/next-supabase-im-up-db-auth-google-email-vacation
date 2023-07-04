@@ -1,0 +1,8 @@
+vacation home booking app with auth via link send to mail and google
+image uploading to supabase
+https://themodern.dev/learn/courses/322389284337222224?l=323578872201216591
+and email sending
+https://themodern.dev/learn/courses/322389284337222224?l=323766881197490769
+
+https://github.com/AlterClassIO/supa-vacation/blob/main/prisma/schema.prisma
+

@@ -1,4 +1,5 @@
 import { Fragment, useState, useEffect } from 'react';
+import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
 import PropTypes from 'prop-types';
@@ -52,7 +53,7 @@ const Confirm = ({ show = false, email = '' }) => (
             <p className="text-lg text-center mt-4">
               We emailed a magic link to <strong>{email ?? ''}</strong>.
               <br />
-              Check your inbox and click the link in the email to login or sign
+              Check your inbox and click the link in the email to login or sign2
               up.
             </p>
           </div>
@@ -68,11 +69,37 @@ const AuthModal = ({ show = false, onClose = () => null }) => {
   const [showSignIn, setShowSignIn] = useState(false);
 
   const signInWithEmail = async ({ email }) => {
-    // TODO: Perform email auth
+    let toastId;
+    try {
+      toastId = toast.loading('Loading...');
+      setDisabled(true);
+      // Perform sign in
+      const { error } = await signIn('email', {
+        redirect: false,
+        callbackUrl: window.location.href,
+        email,
+      });
+      // Something went wrong
+      if (error) {
+        throw new Error(error);
+      }
+      setConfirm(true);
+      toast.dismiss(toastId);
+    } catch (err) {
+      toast.error('Unable to sign in', { id: toastId });
+    } finally {
+      setDisabled(false);
+    }
   };
+  
 
   const signInWithGoogle = () => {
-    // TODO: Perform Google auth
+    toast.loading('Redirecting...');
+    setDisabled(true);
+    // Perform sign in
+    signIn('google', {
+      callbackUrl: window.location.href,
+    });
   };
 
   const closeModal = () => {
@@ -186,7 +213,7 @@ const AuthModal = ({ show = false, onClose = () => null }) => {
                         width={32}
                         height={32}
                       />
-                      <span>Sign {showSignIn ? 'in' : 'up'} with Google</span>
+                      <span >Sign {showSignIn ? 'in' : 'up'} with Google</span>
                     </button>
 
                     {/* Sign with email */}
@@ -198,10 +225,13 @@ const AuthModal = ({ show = false, onClose = () => null }) => {
                     >
                       {({ isSubmitting, isValid, values, resetForm }) => (
                         <Form className="mt-4">
+                          <div className="flex justify-center">
+                          <span className=" text-gray-500 text-base">Sign {showSignIn ? 'in' : 'up'} via link send to email</span>
+                          </div>
                           <Input
                             name="email"
                             type="email"
-                            placeholder="elon@spacex.com"
+                            placeholder="yourmail@gmail.com"
                             disabled={disabled}
                             spellCheck={false}
                           />
